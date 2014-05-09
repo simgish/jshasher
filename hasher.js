@@ -7,7 +7,7 @@ Hasher.prototype = {
 	constructor: Hasher,
 
 	get: function(key) {
-        var h = this.hash(this.objectToStr(key));
+        var h = this.hash(key);
         var entry = this._data[h];
 
         if(!entry)
@@ -21,16 +21,17 @@ Hasher.prototype = {
                     return entry[1];
                 }
                 h = h + 1;
-
-                if (!this._data[h]) return null;
+                entry = this._data[h];
+                if (!entry) return null;
             }
         }
-        return null;
+        return entry[1];
     },
 
     put: function(key, value) {
-        var h = this.hash(this.objectToStr(key));
-        var oldVal = this._data[h];
+        var h = this.hash(key);
+        var oldVal = !this._data[h] ? undefined : this._data[h][1];
+
         while (true) {
             if (!this._data[h]) {
                 this._data[h] = [key, value];
@@ -43,6 +44,8 @@ Hasher.prototype = {
                     return oldVal;
                 }
                 h = h + 1;
+
+                oldVal = !this._data[h] ? undefined : this._data[h][1];
             }
         }
     },
@@ -71,7 +74,7 @@ Hasher.prototype = {
     },
 
     containsKey: function(key) {
-        var h = this.hash(this.objectToStr(key));
+        var h = this.hash(key);
         var entry = this._data[h];
 
         if (!entry) return false;
@@ -82,12 +85,13 @@ Hasher.prototype = {
             }
             h = h + 1;
 
-            if (!this._data[h]) return false;
+            entry = this._data[h];
+            if (!entry) return false;
         }
     },
 
     remove: function(key) {
-        var h = this.hash(this.objectToStr(key));
+        var h = this.hash(key);
         var entry = this._data[h];
 
         if(!entry)
@@ -103,10 +107,12 @@ Hasher.prototype = {
                 }
                 h = h + 1;
 
-                if (!this._data[h]) return false;
+                entry = this._data[h];
+                if (!entry) return false;
             }
         }
-        return false;
+        delete this._data[h];
+        return true;
     },
 
     keySet: function() {
@@ -118,23 +124,23 @@ Hasher.prototype = {
     },
 
     hash: function(key) {
-        if (typeof key !== 'string') {
-            throw key + 'is not a string'
-        }
+        key = this.objectToStr(key);
 
         var h = 0;
         var len = key.length;
 
-        if (h === 0 && len > 0) {
-            for (var i = 0; i < len; i++) {
-                h = 31*h + key.charCodeAt(i);
+        for (var i = 0; i < len; i++) {
+            h = 31*h + key.charCodeAt(i);
+            if(isNaN(h) || h === Number.POSITIVE_INFINITY || h === Number.NEGATIVE_INFINITY)
+            {
+                h = 0;
             }
         }
-        return h;
+        return h % 1000000000000000;
     },
 
     objectToStr: function(obj) {
-        if (!obj) return 0;
+        if (!obj) return 'undefined';
         if (typeof obj === 'string') return obj;
 
         var str = '', objkeys = Object.keys(obj);
