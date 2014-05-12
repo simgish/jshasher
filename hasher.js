@@ -1,17 +1,16 @@
 function Hasher() {
-	this._data = {};
-	this.clear();
+    this._data = {};
+    this.clear();
 }
 
 Hasher.prototype = {
-	constructor: Hasher,
+    constructor: Hasher,
 
-	get: function(key) {
+    get: function(key) {
         var h = this.hash(key);
         var entry = this._data[h];
 
-        if(!entry)
-        {
+        if(!entry) {
             return null;
         }
 
@@ -25,6 +24,7 @@ Hasher.prototype = {
                 if (!entry) return null;
             }
         }
+
         return entry[1];
     },
 
@@ -38,8 +38,7 @@ Hasher.prototype = {
                 return oldVal;
             }
             else {
-                if(this._data[h][0] === key)
-                {
+                if(this._data[h][0] === key) {
                     this._data[h] = [key, value];
                     return oldVal;
                 }
@@ -62,14 +61,15 @@ Hasher.prototype = {
     {
         var retArray = [];
         var keys = Object.keys(this._data);
-        for(var i = 0; i < keys.length; i++)
-        {
+
+        for(var i = 0; i < keys.length; i++) {
             var entry = [];
             var key = keys[i];
             entry[0] = key;
             entry[1] = this._data[key];
             retArray.push(entry);
         }
+
         return retArray;
     },
 
@@ -94,8 +94,7 @@ Hasher.prototype = {
         var h = this.hash(key);
         var entry = this._data[h];
 
-        if(!entry)
-        {
+        if(!entry) {
             return false;
         }
 
@@ -112,6 +111,7 @@ Hasher.prototype = {
             }
         }
         delete this._data[h];
+        
         return true;
     },
 
@@ -131,11 +131,11 @@ Hasher.prototype = {
 
         for (var i = 0; i < len; i++) {
             h = 31*h + key.charCodeAt(i);
-            if(isNaN(h) || h === Number.POSITIVE_INFINITY || h === Number.NEGATIVE_INFINITY)
-            {
+            if(isNaN(h) || h === Number.POSITIVE_INFINITY || h === Number.NEGATIVE_INFINITY) {
                 h = 0;
             }
         }
+
         return h % 1000000000000000;
     },
 
@@ -152,13 +152,11 @@ Hasher.prototype = {
         return str;
     },
 
-    size: function()
-    {
+    size: function() {
         return Object.keys(this._data).length;
     },
 
-    isEmpty: function()
-    {
+    isEmpty: function() {
         return Object.keys(this._data).length === 0;
     }
 }
